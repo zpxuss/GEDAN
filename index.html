@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>歌单查找 · 音乐小站</title>
+    <!-- 引入独立的 CSS 文件 -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="app" id="app">
+
+        <!-- ===== 导航栏 ===== -->
+        <nav class="navbar" id="navbar">
+            <div class="nav-brand">
+                歌单·岛
+                <span>v1</span>
+            </div>
+
+			<!-- 外部链接图片（放在导航栏品牌旁边） -->
+			<a href="https://live.bilibili.com/1882958308" target="_blank" class="external-link" title="前往哔哩哔哩直播间">
+				<img src="img/tiaozhuan.png" alt="外部链接" />
+				<span>予初的直播间</span>
+			</a>
+
+			<!-- 汉堡按钮（三条横线） -->
+			            <div class="hamburger" id="hamburgerBtn" aria-label="菜单">
+			                <span></span>
+			                <span></span>
+			                <span></span>
+			            </div>
+			
+			            <!-- 导航链接 - 默认隐藏，点击汉堡按钮后显示 -->
+			            <div class="nav-links" id="genreNav">
+			                <a href="#" class="genre-tag" data-genre="全部">全部</a>
+			                <a href="#" class="genre-tag" data-genre="流行">流行</a>
+			                <a href="#" class="genre-tag" data-genre="古风">古风</a>
+			                <a href="#" class="genre-tag" data-genre="民谣">民谣</a>
+			                <a href="#" class="genre-tag" data-genre="儿歌">儿歌</a>
+			            </div>
+			
+			            <div class="bg-control">
+			                <label for="bgPicker">背景</label>
+			                <input type="color" id="bgPicker" value="#f2f0f5" />
+			            </div>
+			        </nav>
+
+        <!-- ===== 主网格 ===== -->
+        <div class="main-grid">
+
+            <!-- 左侧：照片卡片 -->
+            <aside class="photo-card">
+                <!-- 图片轮播容器 -->
+				<div class="photo-slider">
+					<div class="photo-frame" id="photoFrame">
+						<!-- 由 JS 渲染图片 -->
+					</div>
+					<!-- 轮播控制按钮 -->
+					<button class="slider-btn slider-prev" id="sliderPrev">‹</button>
+					<button class="slider-btn slider-next" id="sliderNext">›</button>
+					<!-- 指示器 -->
+					<div class="slider-dots" id="sliderDots"></div>
+				</div>
+				<div class="photo-caption">予初的歌单</div>
+				<div class="photo-sub" id="photoSub">点击左右切换封面</div>
+
+				<!-- ===== 随机抽取组件 ===== -->
+				<div class="random-picker">
+					<div class="random-display" id="randomDisplay">
+						<span class="random-icon">🎲</span>
+						<span class="random-text" id="randomText">点击抽取</span>
+					</div>
+					<button class="random-btn" id="randomBtn">
+						<span class="btn-icon">🎯</span>
+						随机一首
+					</button>
+					<div class="random-history" id="randomHistory">
+						<span class="history-label">📋 历史记录</span>
+						<span class="history-list" id="historyList">暂无</span>
+					</div>
+				</div>
+			</aside>
+
+            <!-- 右侧：搜索 + 列表 -->
+            <section class="search-section">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索歌曲、歌手、风格…" value="" />
+                    <button id="searchBtn">查找</button>
+                </div>
+                <div class="song-list-container" id="songListContainer">
+                    <div id="songList"></div>
+                </div>
+                <div class="stats">
+                    <span id="songCount">0 首</span>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 引入独立的 JS 文件 -->
+    <script src="js/script.js"></script>
+</body>
+</html>
