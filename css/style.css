@@ -961,3 +961,135 @@ body {
         max-height: 40px;
     }
 }
+/* ===== 曲风标签 ===== */
+.song-genre {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    border: 1px solid;
+    margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.song-item:hover .song-genre {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== 歌名和曲风布局 ===== */
+.song-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(2px);
+    margin-bottom: 6px;
+    transition: 0.1s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.song-name {
+    font-weight: 500;
+    color: #1a1b26;
+    font-size: 0.98rem;
+    cursor: pointer;
+    transition: 0.15s;
+    padding: 2px 8px;
+    border-radius: 6px;
+    position: relative;
+    user-select: none;
+    flex: 1;
+}
+
+.song-name:hover {
+    background: rgba(43, 45, 66, 0.08);
+    color: #2b2d42;
+    transform: scale(1.02);
+}
+
+.song-name:active {
+    transform: scale(0.95);
+}
+
+.song-name::after {
+    content: ' 📋';
+    opacity: 0;
+    font-size: 0.7rem;
+    transition: 0.2s;
+}
+
+.song-name:hover::after {
+    opacity: 0.5;
+}
+
+/* ===== 随机抽取结果中的曲风标签 ===== */
+.random-genre {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.random-text.picked .random-genre {
+    animation: genreAppear 0.4s ease;
+}
+
+@keyframes genreAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== 响应式 - 小屏幕曲风标签缩小 ===== */
+@media (max-width: 500px) {
+    .song-genre {
+        font-size: 0.55rem;
+        padding: 1px 8px;
+    }
+    
+    .song-name {
+        font-size: 0.85rem;
+    }
+    
+    .song-item {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+}
+
+/* ===== 歌单列表滚动优化 ===== */
+.song-list-container {
+    max-height: 560px;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-top: 6px;
+}
+
+.song-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.song-list-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 10px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb {
+    background: #b8bace;
+    border-radius: 10px;
+}
