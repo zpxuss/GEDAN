@@ -350,7 +350,7 @@ function getGenreBgColor(genre) {
 
 	// ===== 图片轮播配置 =====
 	var imageList = [
-	    'img/yuchu2.jpg',     // 请替换为实际图片路径
+	    './img/yuchu2.jpg',     // 请替换为实际图片路径
 	];
 	
 	var currentImageIndex = 0;
