@@ -385,7 +385,7 @@ function getGenreBgColor(genre) {
 	    // 更新底部文字
 	    var photoSub = document.getElementById('photoSub');
 	    if (photoSub) {
-	        photoSub.textContent = '' + (index + 1) + ' / ' + imageList.length + '  ·  点击左右切换';
+	        photoSub.textContent = '';
 	    }
 	
 	    // 保存到 localStorage
