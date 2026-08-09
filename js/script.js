@@ -47,6 +47,50 @@
     let currentGenre = '全部';
     let currentKeyword = '';
 
+// ===== 获取歌曲曲风 =====
+function getSongGenre(songName) {
+    var genreMap = {
+        '流行': ['谁', 'Doll', '大喜', '贪慕', '谁家', '可能', '天才', '澎湃', '慢慢','旋木', '像鱼', '暖暖', '大鱼', '苍耳', '平庸', '不怕', '再见','记得', '续雪', '雨爱', '大眠', '迷鹿', '借过', '下潜', '演员','她说', '撒野', '冬眠', '嘉宾', '侧脸', '过火', '夜车', '白羊','传奇', '房间', '小孩', '直觉', '对视', '虚拟', '小半', '听海','冲动', '失控','我曾', '阿嬷', '宝贝', '褪黑素', 'i love u', '两三句','苏州河', '口头禅', '我会等', '闹哄哄', '试试吧', '太委屈', '我想念','愿与愁', '下雨了', '他不懂', '虹之间', '我走后', '想某人', '我害怕','我和你', '时间轴', '追光者', '我知道', '我看过', '一点点','小模样', '小幸运', '爱一点', '第一天', '小尾巴', '醉清风', '一笑倾城','万有引力', '我想我会', '爱的魔法', '告白气球', '明天过后','夏天的风', '气象站台', '小镇姑娘', '茶花开了', '连名带姓', '无人之岛', '字字句句', '忽而今夏', '说好不哭', '天外来物', '如果可以', '那个夏天', '忘了没有', '想想念念', '颠倒之间', '好久不见', '忘记时间', '就忘了吧', '失落沙洲', '我很快乐', '不再联系', '像风一样', '一路生花', '勾指起誓', '今夜有雨', '后会无期', '晴天和猫', '情非得已', '忽然之间', '熬夜上瘾', '一半一半', '荷塘月色', '明天，你好', '他乡的月亮', '泼天的富贵', '爱的感叹号', '陪你看星星', '空山新雨后','已经有我啦', '会呼吸的痛', '突然好想你', '爱我还是他','想你时风起','会开花的云', '没那么简单', '只是太爱你', '新梅花三弄','亲爱的你啊', '踮起脚尖爱', '等一场大雨', '阳光下的星星','暗恋这件小事', '有可能的夜晚', '推开世界的门', '梦雨星海之间','化身孤岛的鲸', '阿拉斯加海湾', '离开我的依赖', '如晴天似雨天', '白月光与朱砂痣', '像你这样的朋友', '你的眼睛像星星', '好像要牵你的手', '这世界那么多人', '我期待的不是雪', '第57次取消发送', '我恨明月不照我', '我变了，我没变', '云朵变成棉花糖', '一个人想着一个人', '在加纳共和国离婚', '就让这大雨全都落下', '我多喜欢你，你会知道', '我喜欢你时内心的活动', '无论你多怪异我还是会喜欢你'],
+        '古风': ['探窗', '婚约', '走马', '年轮', '落款', '燕回巷', '伯虎说', '广寒宫','牵丝戏', '声声慢', '相思遥', '霸王别姬', '身骑白马', '情字最大', '错位时空','辞九门回忆', '人间惊鸿宴', '新贵妃醉酒', '晚夜微雨问海棠', '山外小楼夜听雨'],
+        '民谣': ['七月上', '可能否', '奇妙能力歌', '寂寞烟火'],
+        '儿歌': ['小年兽', '凑热闹', '虫儿飞', '恶龙与小熊', '小了白了兔','快乐的扑满', '老公公老婆婆', '你是我的小狗', '我还有点小糊涂','请你吃个冰激凌', '酸酸甜甜就是我']
+    };
+    
+    for (var genre in genreMap) {
+        if (genreMap.hasOwnProperty(genre)) {
+            var keywords = genreMap[genre];
+            for (var i = 0; i < keywords.length; i++) {
+                if (songName.includes(keywords[i])) {
+                    return genre;
+                }
+            }
+        }
+    }
+    return '未分类';
+}
+
+// ===== 获取曲风颜色 =====
+function getGenreColor(genre) {
+    var colorMap = {
+        '流行': '#4a6cf7',
+        '古风': '#e67e22',
+        '民谣': '#27ae60',
+        '儿歌': '#e74c5e',
+    };
+    return colorMap[genre] || '#95a5a6';
+}
+
+// ===== 获取曲风背景色（浅色版） =====
+function getGenreBgColor(genre) {
+    var bgMap = {
+        '流行': 'rgba(74, 108, 247, 0.10)',
+        '古风': 'rgba(230, 126, 34, 0.10)',
+        '民谣': 'rgba(39, 174, 96, 0.10)',
+        '儿歌': 'rgba(231, 76, 94, 0.10)',
+    };
+    return bgMap[genre] || 'rgba(149, 165, 166, 0.10)';
+}
+
     // ===== Toast 提示函数 =====
     function showToast(message) {
         // 移除已有的 Toast
@@ -165,15 +209,22 @@
         }
 
         var html = '';
-        for (var i = 0; i < filteredSongs.length; i++) {
-            var song = filteredSongs[i];
-            html += `
-                <div class="song-item">
-                    <span class="song-index">#${i + 1}</span>
-                    <span class="song-name" data-song="${song}">${song}</span>
-                </div>
-            `;
-        }
+		for (var i = 0; i < filteredSongs.length; i++) {
+			var song = filteredSongs[i];
+			var genre = getSongGenre(song);
+			var color = getGenreColor(genre);
+			var bgColor = getGenreBgColor(genre);
+
+			html += `
+				<div class="song-item">
+					<span class="song-index">#${i + 1}</span>
+					<span class="song-name" data-song="${song}">${song}</span>
+					<span class="song-genre" style="color:${color};background:${bgColor};border-color:${color}30;">
+						${genre}
+					</span>
+				</div>
+			`;
+		}
         songListEl.innerHTML = html;
         songCountEl.textContent = filteredSongs.length + ' 首';
 
@@ -299,7 +350,6 @@
 
 	// ===== 图片轮播配置 =====
 	var imageList = [
-	    'img/yuchu.jpg',      // 默认图片
 	    'img/yuchu2.jpg',     // 请替换为实际图片路径
 	];
 	
