@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>歌单查找 · 音乐小站</title>
+    <!-- 引入独立的 CSS 文件 -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="app" id="app">
+
+        <!-- ===== 导航栏 ===== -->
+        <nav class="navbar" id="navbar">
+            <div class="nav-brand">
+                歌单·岛
+                <span>v1</span>
+            </div>
+            <div class="nav-links" id="genreNav">
+                <!-- 由 JS 动态生成，但保留静态备用 -->
+                <a href="#" class="genre-tag" data-genre="全部">全部</a>
+                <a href="#" class="genre-tag" data-genre="流行">流行</a>
+                <a href="#" class="genre-tag" data-genre="古风">古风</a>
+                <a href="#" class="genre-tag" data-genre="民谣">🪕 民谣</a>
+                <a href="#" class="genre-tag" data-genre="电子">⚡ 电子</a>
+                <a href="#" class="genre-tag" data-genre="影视">🎬 影视</a>
+            </div>
+            <div class="bg-control">
+                <label for="bgPicker">背景</label>
+                <input type="color" id="bgPicker" value="#f2f0f5" />
+            </div>
+        </nav>
+
+        <!-- ===== 主网格 ===== -->
+        <div class="main-grid">
+
+            <!-- 左侧：照片卡片 -->
+            <aside class="photo-card">
+                <div class="photo-frame" id="photoFrame">
+                    <!-- 由 JS 渲染图片 -->
+                </div>
+                <div class="photo-caption">予初的歌单</div>
+            </aside>
+
+            <!-- 右侧：搜索 + 列表 -->
+            <section class="search-section">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索歌曲、歌手、风格…" value="" />
+                    <button id="searchBtn">查找</button>
+                </div>
+                <div class="song-list-container" id="songListContainer">
+                    <div id="songList"></div>
+                </div>
+                <div class="stats">
+                    <span id="songCount">0 首</span>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 引入独立的 JS 文件 -->
+    <script src="js/script.js"></script>
+</body>
+</html>
