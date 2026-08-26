@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑歌单</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* ===== 编辑页专用样式 ===== */
+        .edit-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e8e8e8;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .edit-header h2 {
+            font-size: 24px;
+            color: #1e1f2b;
+            margin: 0;
+        }
+
+        .edit-header .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            padding: 8px 24px;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #3a56d4;
+        }
+
+        .back-btn.danger {
+            background: #e74c5e;
+        }
+
+        .back-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        /* ===== 登录遮罩 ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-box .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-box .logo .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .login-box .logo h3 {
+            font-size: 22px;
+            color: #1e1f2b;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .login-box .logo p {
+            color: #888;
+            font-size: 14px;
+            margin: 4px 0 0;
+        }
+
+        .login-box .form-group {
+            margin-bottom: 18px;
+        }
+
+        .login-box .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .login-box .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: #f8f9fa;
+            box-sizing: border-box;
+        }
+
+        .login-box .form-group input:focus {
+            outline: none;
+            border-color: #4a6cf7;
+            background: white;
+        }
+
+        .login-box .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2b2d42, #4a4e6b);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 6px;
+        }
+
+        .login-box .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(43, 45, 66, 0.3);
+        }
+
+        .login-box .login-btn:active {
+            transform: scale(0.97);
+        }
+
+        .login-box .login-error {
+            color: #e74c5e;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        .login-box .login-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .login-box .login-hint code {
+            background: #f0f0f5;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4a6cf7;
+        }
+
+        /* ===== 添加区域 ===== */
+        .add-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 16px 20px;
+            border-radius: 12px;
+            align-items: center;
+        }
+
+        .add-section input {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .add-section input:focus {
+            outline: none;
+            border-color: #4a6cf7;
+        }
+
+        .add-section .add-btn {
+            padding: 10px 28px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .add-section .add-btn:hover {
+            background: #219a52;
+        }
+
+        .add-section .reset-btn {
+            padding: 10px 20px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .add-section .reset-btn:hover {
+            background: #d35400;
+        }
+
+        /* ===== 统计信息 ===== */
+        .edit-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+            font-size: 14px;
+            color: #888;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .edit-stats .count {
+            font-weight: 600;
+            color: #1e1f2b;
+        }
+
+        .edit-stats .clear-all-btn {
+            padding: 4px 16px;
+            background: #e74c5e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .edit-stats .clear-all-btn:hover {
+            background: #c0392b;
+        }
+
+        /* ===== 歌单列表 ===== */
+        .edit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .edit-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f0f0f0;
+            transition: all 0.2s;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .edit-list li:hover {
+            border-color: #d0d0d0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .edit-list .song-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .edit-list .song-index {
+            color: #bbb;
+            font-size: 13px;
+            font-weight: 500;
+            min-width: 36px;
+        }
+
+        .edit-list .song-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1e1f2b;
+        }
+
+        .edit-list .song-artist {
+            font-size: 13px;
+            color: #7a7e9a;
+            padding: 2px 10px;
+            background: #f0f0f5;
+            border-radius: 12px;
+        }
+
+        .edit-list .song-genre-tag {
+            font-size: 12px;
+            padding: 2px 14px;
+            border-radius: 20px;
+            background: #f0f0f5;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .edit-list .song-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .edit-list .song-actions button {
+            padding: 4px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .edit-list .edit-btn {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .edit-list .edit-btn:hover {
+            background: #e0a800;
+        }
+
+        .edit-list .delete-btn {
+            background: #e74c5e;
+            color: white;
+        }
+
+        .edit-list .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        /* ===== 行内编辑模式 ===== */
+        .edit-list .inline-edit {
+            display: none;
+            gap: 8px;
+            flex: 1;
+            align-items: center;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .edit-list .inline-edit input {
+            padding: 6px 12px;
+            border: 2px solid #4a6cf7;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 80px;
+            background: white;
+        }
+
+        .edit-list .inline-edit input:focus {
+            outline: none;
+        }
+
+        .edit-list .inline-edit .save-btn {
+            padding: 4px 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .edit-list .inline-edit .save-btn:hover {
+            background: #219a52;
+        }
+
+        .edit-list .inline-edit .cancel-btn {
+            padding: 4px 16px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .edit-list .inline-edit .cancel-btn:hover {
+            background: #7f8c8d;
+        }
+
+        /* ===== 编辑状态 ===== */
+        .edit-list li.editing .song-info {
+            display: none !important;
+        }
+
+        .edit-list li.editing .song-actions {
+            display: none !important;
+        }
+
+        .edit-list li.editing .inline-edit {
+            display: flex !important;
+        }
+
+        /* ===== 空状态 ===== */
+        .empty-tip {
+            text-align: center;
+            color: #bbb;
+            padding: 60px 0;
+            font-size: 16px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 2px dashed #e8e8e8;
+            list-style: none;
+        }
+
+        .empty-tip .emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ===== Toast 动画 ===== */
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        /* ===== 内容隐藏（未登录时） ===== */
+        .edit-content {
+            display: none;
+        }
+
+        .edit-content.visible {
+            display: block;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .edit-container {
+                margin: 16px auto;
+                padding: 0 12px;
+            }
+
+            .edit-header h2 {
+                font-size: 18px;
+            }
+
+            .edit-header .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .add-section {
+                padding: 12px 16px;
+            }
+
+            .add-section input {
+                min-width: 80px;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .add-section .add-btn,
+            .add-section .reset-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .edit-list li {
+                padding: 10px 12px;
+            }
+
+            .edit-list .song-info {
+                gap: 8px;
+            }
+
+            .edit-list .song-artist {
+                font-size: 12px;
+                padding: 1px 8px;
+            }
+
+            .edit-list .inline-edit input {
+                min-width: 50px;
+                font-size: 13px;
+            }
+
+            .login-box {
+                padding: 32px 24px 28px;
+            }
+
+            .login-box .logo .icon {
+                font-size: 36px;
+            }
+
+            .login-box .logo h3 {
+                font-size: 18px;
+            }
+
+            .edit-stats {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .edit-list .song-artist {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 登录遮罩 ===== -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="logo">
+                <span class="icon">🔐</span>
+                <h3>编辑歌单</h3>
+                <p>请输入管理员密码</p>
+            </div>
+            <div class="form-group">
+                <label>👤 用户名</label>
+                <input type="text" id="loginUsername" value="yuchu" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>🔑 密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码" onkeydown="if(event.key==='Enter') handleLogin()">
+            </div>
+            <button class="login-btn" onclick="handleLogin()">🔓 登录</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- ===== 编辑内容（登录后显示） ===== -->
+    <div class="edit-container" id="editContainer">
+        <div class="edit-content" id="editContent">
+            <!-- 头部 -->
+            <div class="edit-header">
+                <h2>📝 编辑歌单</h2>
+                <div class="header-actions">
+                    <span id="userDisplay" style="font-size:13px;color:#888;background:#f0f0f5;padding:4px 14px;border-radius:20px;">👤 admin</span>
+                    <button class="back-btn" onclick="goBack()">← 返回歌单</button>
+                    <button class="back-btn danger" onclick="handleLogout()">🚪 退出</button>
+                </div>
+            </div>
+
+            <!-- 添加歌曲（增加歌手输入） -->
+            <div class="add-section">
+                <input type="text" id="songNameInput" placeholder="歌名（如：稻香）">
+                <input type="text" id="songArtistInput" placeholder="歌手（如：周杰伦）">
+                <input type="text" id="songGenreInput" placeholder="类型（如：流行）">
+                <button class="add-btn" onclick="addSong()">➕ 添加歌曲</button>
+                <button class="reset-btn" onclick="resetPlaylist()">🔄 恢复默认</button>
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="edit-stats">
+                <span>共 <span class="count" id="songCount">0</span> 首歌</span>
+                <button class="clear-all-btn" onclick="clearAllSongs()">🗑️ 清空全部</button>
+            </div>
+
+            <!-- 歌单列表 -->
+            <ul class="edit-list" id="editList">
+                <!-- JS 动态渲染 -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 🔐 登录系统
+        // ============================================================
+
+        // 默认登录凭证
+        const DEFAULT_CREDENTIALS = {
+            username: 'yuchu',
+            password: '1234567890'
+        };
+
+        // 登录状态
+        let isLoggedIn = false;
+
+        // DOM 元素
+        const loginOverlay = document.getElementById('loginOverlay');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
+        const editContent = document.getElementById('editContent');
+        const userDisplay = document.getElementById('userDisplay');
+
+        // ============================================================
+        // 登录函数
+        // ============================================================
+
+        function handleLogin() {
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+
+            loginError.textContent = '';
+
+            if (!username || !password) {
+                loginError.textContent = '⚠️ 请输入用户名和密码';
+                return;
+            }
+
+            if (username === DEFAULT_CREDENTIALS.username && password === DEFAULT_CREDENTIALS.password) {
+                isLoggedIn = true;
+                loginOverlay.classList.add('hidden');
+                editContent.classList.add('visible');
+
+                if (userDisplay) {
+                    userDisplay.textContent = '👤 ' + username;
+                }
+
+                try {
+                    sessionStorage.setItem('editLogin', JSON.stringify({
+                        loggedIn: true,
+                        username: username,
+                        timestamp: Date.now()
+                    }));
+                } catch (e) {}
+
+                render();
+                console.log('✅ 登录成功：', username);
+            } else {
+                loginError.textContent = '❌ 用户名或密码错误，请重试';
+                loginPassword.value = '';
+                loginPassword.focus();
+            }
+        }
+
+        // ============================================================
+        // 退出登录
+        // ============================================================
+
+        function handleLogout() {
+            if (confirm('确定要退出登录吗？')) {
+                isLoggedIn = false;
+                editContent.classList.remove('visible');
+                loginOverlay.classList.remove('hidden');
+                loginPassword.value = '';
+                loginError.textContent = '';
+                try {
+                    sessionStorage.removeItem('editLogin');
+                } catch (e) {}
+                console.log('🚪 已退出登录');
+            }
+        }
+
+        // ============================================================
+        // 检查登录状态
+        // ============================================================
+
+        function checkLoginStatus() {
+            try {
+                const saved = sessionStorage.getItem('editLogin');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.loggedIn && data.timestamp && (Date.now() - data.timestamp < 3600000)) {
+                        isLoggedIn = true;
+                        loginOverlay.classList.add('hidden');
+                        editContent.classList.add('visible');
+                        if (userDisplay) {
+                            userDisplay.textContent = '👤 ' + (data.username || 'admin');
+                        }
+                        render();
+                        console.log('🔄 自动登录成功');
+                        return true;
+                    } else {
+                        sessionStorage.removeItem('editLogin');
+                    }
+                }
+            } catch (e) {}
+
+            loginOverlay.classList.remove('hidden');
+            editContent.classList.remove('visible');
+            return false;
+        }
+
+        // ============================================================
+        // 📝 歌单编辑逻辑（支持歌手）
+        // ============================================================
+
+        const editList = document.getElementById('editList');
+        const songNameInput = document.getElementById('songNameInput');
+        const songArtistInput = document.getElementById('songArtistInput');
+        const songGenreInput = document.getElementById('songGenreInput');
+        const songCountEl = document.getElementById('songCount');
+
+        let editingIndex = -1;
+
+        // ============================================================
+        // 确保 PlaylistAPI 存在（支持歌手）
+        // ============================================================
+
+        function ensurePlaylistAPI() {
+            if (typeof PlaylistAPI === 'undefined') {
+                console.warn('⚠️ PlaylistAPI 未定义，使用内联实现（含歌手）');
+
+                const STORAGE_KEY = 'playlist';
+                const DEFAULT_SONGS = [
+                    // 国风
+                    { name: "伯虎说", artist: "伯爵Johnny/唐伯虎Annie", genre: "国风" },
+                    { name: "半壶纱", artist: "刘珂矣", genre: "国风" },
+                    { name: "霸王别姬", artist: "屠洪刚", genre: "国风" },
+                    { name: "错位时空", artist: "艾辰", genre: "国风" },
+                    { name: "辞九门回忆", artist: "等什么君", genre: "国风" },
+                    { name: "枫叶城", artist: "单循", genre: "国风" },
+                    { name: "广寒宫", artist: "丸子呦", genre: "国风" },
+                    { name: "勾指起誓", artist: "洛天依", genre: "国风" },
+                    { name: "寄明月", artist: "SING女团", genre: "国风" },
+                    { name: "九张机", artist: "叶炫清", genre: "国风" },
+                    { name: "婚约", artist: "戚琦", genre: "国风" },
+                    { name: "交换余生", artist: "林俊杰", genre: "国风" },
+                    { name: "可惜没如果", artist: "林俊杰", genre: "国风" },
+                    { name: "落款", artist: "花粥 / Vicky宣宣", genre: "国风" },
+                    { name: "浪人琵琶", artist: "胡66", genre: "国风" },
+                    { name: "年轮", artist: "张碧晨", genre: "国风" },
+                    { name: "人间惊鸿宴", artist: "指尖笑", genre: "国风" },
+                    { name: "若梦", artist: "周深", genre: "国风" },
+                    { name: "声声慢", artist: "崔开潮", genre: "国风" },
+                    { name: "山外小楼夜听雨", artist: "任然", genre: "国风" },
+                    { name: "锁", artist: "黄龄", genre: "国风" },
+                    { name: "探窗", artist: "浮生梦 / 汐音社", genre: "国风" },
+                    { name: "晚夜微雨问海棠", artist: "镜予歌/陈亦洺", genre: "国风" },
+                    { name: "云烟成雨", artist: "房东的猫", genre: "国风" },
+                    { name: "烟雨行舟", artist: "司南", genre: "国风" },
+                    { name: "燕回巷", artist: "兔裹煎蛋卷", genre: "国风" },
+                    { name: "云与海", artist: "阿YueYue", genre: "国风" },
+                    { name: "青花瓷", artist: "周杰伦", genre: "国风" },
+                    { name: "牵丝戏", artist: "银临/Aki阿杰", genre: "国风" },
+                    { name: "情字最大", artist: "浅影阿", genre: "国风" },
+                    { name: "新贵妃醉酒", artist: "李玉刚", genre: "国风" },
+                    { name: "新梅花三弄", artist: "唐伯虎Annie/裁缝铺", genre: "国风" },
+                    { name: "相思遥", artist: "魏玉慧", genre: "国风" },
+                    { name: "身骑白马", artist: "徐佳莹", genre: "国风" },
+                    // 甜歌
+                    { name: "爱的感叹号", artist: "浣语", genre: "甜歌" },
+                    { name: "爱的魔法", artist: "金莎", genre: "甜歌" },
+                    { name: "爱你", artist: "王心凌", genre: "甜歌" },
+                    { name: "白月光与朱砂痣", artist: "大籽", genre: "甜歌" },
+                    { name: "宝贝", artist: "张悬", genre: "甜歌" },
+                    { name: "大喜", artist: "泠鸢yousa", genre: "甜歌" },
+                    { name: "对视", artist: "Sasablue", genre: "甜歌" },
+                    { name: "咖喱咖喱", artist: "牛奶咖啡", genre: "甜歌" },
+                    { name: "勾指起誓", artist: "洛天依", genre: "甜歌" },
+                    { name: "好像要牵你的手", artist: "一口甜", genre: "甜歌" },
+                    { name: "已经有我啦", artist: "苏晗", genre: "甜歌" },
+                    { name: "我多喜欢你你会知道", artist: "王俊琪", genre: "甜歌" },
+                    { name: "我愿意平凡的陪在你身旁", artist: "王七七", genre: "甜歌" },
+                    { name: "陪你看星星", artist: "陈子晴", genre: "甜歌" },
+                    { name: "泼天的富贵", artist: "ATK / 宋盐球", genre: "甜歌" },
+                    { name: "青柠", artist: "徐秉龙/桃十五", genre: "甜歌" },
+                    { name: "热爱105°的你", artist: "阿肆", genre: "甜歌" },
+                    { name: "凑热闹", artist: "BY2", genre: "甜歌" },
+                    { name: "谁家", artist: "池鱼", genre: "甜歌" },
+                    { name: "夏天的风", artist: "Uu", genre: "甜歌" },
+                    { name: "小城夏天", artist: "LBI利比", genre: "甜歌" },
+                    { name: "想想念念", artist: "FAFA / 雪二", genre: "甜歌" },
+                    { name: "像你这样的朋友", artist: "陆虎", genre: "甜歌" },
+                    { name: "小尾巴", artist: "葛雨晴", genre: "甜歌" },
+                    { name: "一点点", artist: "董唧唧 / 芊芊龍", genre: "甜歌" },
+                    { name: "有点甜", artist: "汪苏泷/B2", genre: "甜歌" },
+                    { name: "一笑倾城", artist: "汪苏泷", genre: "甜歌" },
+                    { name: "万有引力", artist: "汪苏泷", genre: "甜歌" },
+                    { name: "有何不可", artist: "许嵩", genre: "甜歌" },
+                    { name: "爱一点", artist: "李楚楚", genre: "甜歌" },
+                    { name: "暗恋这件小事", artist: "赵希予", genre: "甜歌" },
+                    { name: "第一天", artist: "孙燕姿", genre: "甜歌" },
+                    { name: "暖暖", artist: "梁静茹", genre: "甜歌" },
+                    { name: "我会等", artist: "承桓", genre: "甜歌" },
+                    { name: "樱花草", artist: "Sweety", genre: "甜歌" },
+                    { name: "云朵变成棉花糖", artist: "泡芙芙Scarlett", genre: "甜歌" },
+                    { name: "你的眼睛像星星", artist: "刘至佳", genre: "甜歌" },
+                    { name: "直觉", artist: "晚巧", genre: "甜歌" },
+                    // 民谣
+                    { name: "七月上", artist: "Jam", genre: "民谣" },
+                    { name: "寂寞烟火", artist: "蓝心羽", genre: "民谣" },
+                    { name: "奇妙能力歌", artist: "陈粒", genre: "民谣" },
+                    { name: "可能否", artist: "木小雅", genre: "民谣" },
+                    // 流行
+                    { name: "阿嬷", artist: "周林枫", genre: "流行" },
+                    { name: "阿拉斯加海湾", artist: "菲道尔", genre: "流行" },
+                    { name: "白羊", artist: "曲肖冰", genre: "流行" },
+                    { name: "大鱼", artist: "周深", genre: "流行" },
+                    { name: "颠倒之间", artist: "周深", genre: "流行" },
+                    { name: "Doll", artist: "菲菲公主", genre: "流行" },
+                    { name: "第57次取消发送", artist: "菲菲公主", genre: "流行" },
+                    { name: "化身孤岛的鲸", artist: "周深", genre: "流行" },
+                    { name: "画", artist: "邓紫棋", genre: "流行" },
+                    { name: "后会无期", artist: "邓紫棋", genre: "流行" },
+                    { name: "好想爱这个世界啊", artist: "华晨宇", genre: "流行" },
+                    { name: "会呼吸的痛", artist: "梁静茹", genre: "流行" },
+                    { name: "忽而今夏", artist: "汪苏泷", genre: "流行" },
+                    { name: "还你一些孤单", artist: "汪苏泷", genre: "流行" },
+                    { name: "荷塘月色", artist: "凤凰传奇", genre: "流行" },
+                    { name: "红色高跟鞋", artist: "蔡健雅", genre: "流行" },
+                    { name: "给我一首歌的时间", artist: "周杰伦", genre: "流行" },
+                    { name: "告白气球", artist: "周杰伦", genre: "流行" },
+                    { name: "孤单北半球", artist: "梁静茹", genre: "流行" },
+                    { name: "房间", artist: "刘瑞琦", genre: "流行" },
+                    { name: "就忘了吧", artist: "1K", genre: "流行" },
+                    { name: "记得", artist: "张惠妹", genre: "流行" },
+                    { name: "落空", artist: "印子月", genre: "流行" },
+                    { name: "连名带姓", artist: "yihuik苡慧", genre: "流行" },
+                    { name: "麦浪", artist: "yihuik苡慧", genre: "流行" },
+                    { name: "慢慢", artist: "Uu", genre: "流行" },
+                    { name: "明天过后", artist: "张杰", genre: "流行" },
+                    { name: "梦雨星海之间", artist: "司南", genre: "流行" },
+                    { name: "那天下雨了", artist: "周杰伦", genre: "流行" },
+                    { name: "闹哄哄", artist: "郁可唯", genre: "流行" },
+                    { name: "如果爱忘了", artist: "戚薇", genre: "流行" },
+                    { name: "如果可以", artist: "韦礼安", genre: "流行" },
+                    { name: "如果这就是爱情", artist: "张靓颖", genre: "流行" },
+                    { name: "如晴天似雨天", artist: "Sasablue", genre: "流行" },
+                    { name: "推开世界的门", artist: "杨乃文", genre: "流行" },
+                    { name: "童话", artist: "光良", genre: "流行" },
+                    { name: "童话镇", artist: "暗杠", genre: "流行" },
+                    { name: "踏浪", artist: "徐怀钰", genre: "流行" },
+                    { name: "褪黑素", artist: "江皓南", genre: "流行" },
+                    { name: "天黑黑", artist: "孙燕姿", genre: "流行" },
+                    { name: "天后", artist: "陈势安", genre: "流行" },
+                    { name: "听海", artist: "张惠妹", genre: "流行" },
+                    { name: "时间轴", artist: "刘嘉慧", genre: "流行" },
+                    { name: "奢香夫人", artist: "凤凰传奇", genre: "流行" },
+                    { name: "失落沙洲", artist: "徐佳莹", genre: "流行" },
+                    { name: "苏州河", artist: "薛凯琪", genre: "流行" },
+                    { name: "说好不哭", artist: "周杰伦/阿信", genre: "流行" },
+                    { name: "同手同脚", artist: "温岚", genre: "流行" },
+                    { name: "我害怕", artist: "薛之谦", genre: "流行" },
+                    { name: "我很快乐", artist: "刘惜君", genre: "流行" },
+                    { name: "我和你", artist: "唐宁", genre: "流行" },
+                    { name: "我看过", artist: "Zkaaai", genre: "流行" },
+                    { name: "我变了，我没变", artist: "张碧晨", genre: "流行" },
+                    { name: "我喜欢你时内心的活动", artist: "陈绮贞", genre: "流行" },
+                    { name: "无人之岛", artist: "任然", genre: "流行" },
+                    { name: "忘记时间", artist: "胡歌", genre: "流行" },
+                    { name: "下潜", artist: "川青", genre: "流行" },
+                    { name: "小半", artist: "陈粒", genre: "流行" },
+                    { name: "小模样", artist: "张小只ya", genre: "流行" },
+                    { name: "小孩", artist: "罗森涛", genre: "流行" },
+                    { name: "小情歌", artist: "苏打绿", genre: "流行" },
+                    { name: "像风一样", artist: "薛之谦", genre: "流行" },
+                    { name: "像鱼", artist: "王贰浪", genre: "流行" },
+                    { name: "虚拟", artist: "陈粒", genre: "流行" },
+                    { name: "演员", artist: "薛之谦", genre: "流行" },
+                    { name: "夜车", artist: "曾轶可", genre: "流行" },
+                    { name: "有可能的夜晚", artist: "曾轶可", genre: "流行" },
+                    { name: "一路生花", artist: "温奕心", genre: "流行" },
+                    { name: "一个像夏天一个像秋天", artist: "范玮琪", genre: "流行" },
+                    { name: "雨爱", artist: "杨丞琳", genre: "流行" },
+                    { name: "月牙湾", artist: "飞儿乐团", genre: "流行" },
+                    { name: "在加纳共和国离婚", artist: "菲道尔", genre: "流行" },
+                    { name: "再见", artist: "邓紫棋", genre: "流行" },
+                    { name: "追光者", artist: "岑宁儿", genre: "流行" },
+                    { name: "醉清风", artist: "弦子", genre: "流行" },
+                    { name: "最炫民族风", artist: "凤凰传奇", genre: "流行" },
+                    { name: "只是太爱你", artist: "张敬轩", genre: "流行" },
+                    { name: "至少还有你", artist: "林忆莲", genre: "流行" },
+                    { name: "这世界那么多人", artist: "莫文蔚", genre: "流行" },
+                    { name: "字字句句", artist: "张碧晨", genre: "流行" },
+                    { name: "爱就一个字", artist: "张信哲", genre: "流行" },
+                    { name: "爱如潮水", artist: "张信哲", genre: "流行" },
+                    { name: "安静", artist: "周杰伦", genre: "流行" },
+                    { name: "苍耳", artist: "司南", genre: "流行" },
+                    { name: "传奇", artist: "王菲", genre: "流行" },
+                    { name: "冲动", artist: "印子月", genre: "流行" },
+                    { name: "大眠", artist: "王心凌", genre: "流行" },
+                    { name: "过火", artist: "张信哲", genre: "流行" },
+                    { name: "会开花的云", artist: "弦子/姚晓棠", genre: "流行" },
+                    { name: "嘉宾", artist: "张远", genre: "流行" },
+                    { name: "关键词", artist: "林俊杰", genre: "流行" },
+                    { name: "离开我的依赖", artist: "yihuik苡慧", genre: "流行" },
+                    { name: "明明就", artist: "周杰伦", genre: "流行" },
+                    { name: "魔法城堡", artist: "TFBOYS", genre: "流行" },
+                    { name: "那女孩对我说", artist: "黄义达", genre: "流行" },
+                    { name: "泡沫", artist: "邓紫棋", genre: "流行" },
+                    { name: "撒野", artist: "凯瑟喵", genre: "流行" },
+                    { name: "她说", artist: "林俊杰", genre: "流行" },
+                    { name: "太聪明", artist: "陈绮贞", genre: "流行" },
+                    { name: "太委屈", artist: "陶晶莹", genre: "流行" },
+                    { name: "天外来物", artist: "薛之谦", genre: "流行" },
+                    { name: "忘了没有", artist: "王靖雯", genre: "流行" },
+                    { name: "我走后", artist: "小咪", genre: "流行" },
+                    { name: "我期待的不是雪", artist: "张妙格", genre: "流行" },
+                    { name: "旋木", artist: "王菲", genre: "流行" },
+                    { name: "雪落下的声音", artist: "陆虎", genre: "流行" },
+                    { name: "愿与愁", artist: "林俊杰", genre: "流行" },
+                    { name: "侧脸", artist: "于果", genre: "流行" },
+                    { name: "中毒", artist: "队长", genre: "流行" },
+                    { name: "多远都要在一起", artist: "邓紫棋", genre: "流行" },
+                    { name: "爱笑的眼睛", artist: "徐若瑄", genre: "流行" },
+                    { name: "熬夜上瘾", artist: "刘亦心", genre: "流行" },
+                    { name: "一半一半", artist: "欧阳娣娣", genre: "流行" },
+                    { name: "甲乙丙丁", artist: "李佳薇", genre: "流行" },
+                    { name: "时光盲盒", artist: "ChiliChill乐团", genre: "流行" },
+                    { name: "想某人", artist: "王优秀", genre: "流行" },
+                    { name: "歡迎光臨", artist: "Bo Peep", genre: "流行" },
+                    { name: "爱的供养", artist: "杨幂", genre: "流行" },
+                    { name: "如果的事", artist: "范玮琪/张韶涵", genre: "流行" },
+                    { name: "蝴蝶泉边", artist: "黄雅莉", genre: "流行" },
+                    { name: "我想我会", artist: "尹露浠", genre: "流行" },
+                    { name: "气象站台", artist: "Uu", genre: "流行" },
+                    { name: "那个夏天", artist: "Uu", genre: "流行" },
+                    { name: "小镇姑娘", artist: "陶喆", genre: "流行" },
+                    { name: "茶花开了", artist: "王睿卓", genre: "流行" },
+                    { name: "忽然之间", artist: "莫文蔚", genre: "流行" },
+                    { name: "明天，你好", artist: "牛奶咖啡", genre: "流行" },
+                    { name: "空山新雨后", artist: "音阙诗听", genre: "流行" },
+                    { name: "想你时风起", artist: "单依纯", genre: "流行" },
+                    { name: "没那么简单", artist: "黄小琥", genre: "流行" },
+                    { name: "等一场大雨", artist: "苏星婕", genre: "流行" },
+                    { name: "他乡的月亮", artist: "熙月月", genre: "流行" },
+                    { name: "亲爱的你啊", artist: "任素汐", genre: "流行" },
+                    { name: "踮起脚尖爱", artist: "冯提莫", genre: "流行" },
+                    { name: "阳光彩虹小白马", artist: "大张伟", genre: "流行" },
+                    { name: "不完美的小孩", artist: "TFBOYS", genre: "流行" },
+                    { name: "无论你多怪异我还是会喜欢你", artist: "周子琰", genre: "流行" },
+                    { name: "就让这大雨全都落下", artist: "容祖儿", genre: "流行" },
+                    { name: "一个人想着一个人", artist: "曾沛慈", genre: "流行" },
+                    { name: "亲爱的那不是爱情", artist: "张韶涵", genre: "流行" },
+                    { name: "两三句", artist: "刘瑞琦", genre: "流行" },
+                    { name: "疑心病", artist: "任然", genre: "流行" },
+                    { name: "一格格", artist: "卫兰", genre: "流行" },
+                    { name: "起风了", artist: "买辣椒也用券", genre: "流行" },
+                    { name: "口头禅", artist: "张靓颖", genre: "流行" },
+                    { name: "试试吧", artist: "陈童言/刘悦spam", genre: "流行" },
+                    { name: "他不懂", artist: "张杰", genre: "流行" },
+                    { name: "虹之间", artist: "金贵晟", genre: "流行" },
+                    { name: "不再联系", artist: "夏天Alex", genre: "流行" },
+                    { name: "东京不太热", artist: "洛天依", genre: "流行" },
+                    { name: "今夜有雨", artist: "白允yu", genre: "流行" },
+                    { name: "阳光下的星星", artist: "白允yu", genre: "流行" },
+                    { name: "晴天和猫", artist: "花粥", genre: "流行" },
+                    { name: "情非得已", artist: "张信哲", genre: "流行" },
+                    { name: "孤独的总和", artist: "吴汶芳", genre: "流行" },
+                    // 儿歌
+                    { name: "虫儿飞", artist: "晚巧", genre: "儿歌" },
+                    { name: "恶龙与小熊", artist: "小点新", genre: "儿歌" },
+                    { name: "老公公老婆婆", artist: "朱主爱", genre: "儿歌" },
+                    { name: "快乐的扑满", artist: "邵丽棠", genre: "儿歌" },
+                    { name: "我还有点小糊涂", artist: "刘晨", genre: "儿歌" },
+                    { name: "我和你", artist: "唐宁", genre: "儿歌" },
+                    { name: "请你吃个冰激凌", artist: "花粥", genre: "儿歌" },
+                    { name: "酸酸甜甜就是我", artist: "张含韵", genre: "儿歌" },
+                    { name: "Upupu", artist: "小皮皮爱学习", genre: "儿歌" },
+                    { name: "小了白了兔", artist: "叶洛洛", genre: "儿歌" },
+                    { name: "小年兽", artist: "程嘉敏", genre: "儿歌" },
+                    { name: "你是我的小狗", artist: "西彬", genre: "儿歌" }
+                ];
+
+                function getGenre(song) {
+                    const gufeng = ['探窗', '婚约', '伯虎说', '广寒宫', '牵丝戏', '声声慢', '辞九门回忆', '新贵妃醉酒', '人间惊鸿宴', '半壶纱', '不染', '寄明月', '九张机', '浪人琵琶', '若梦', '童话镇', '蝴蝶泉边', '烟雨行舟', '赤岭', '春泥', '枫叶城', '燕回巷', '相思遥', '霸王别姬', '一笑倾城', '勾指起誓', '山外小楼夜听雨', '晚夜微雨问海棠', '白月光与朱砂痣', '新梅花三弄', '空山新雨后', '梦雨星海之间', '化身孤岛的鲸', '如晴天似雨天', '年', '锁', '年轮', '苍耳', '落款', '下潜', '续雪', '小年兽', '苏州河', '口头禅', '颠倒之间', '情字最大', '错位时空', '一路生花'];
+                    const minyao = ['七月上', '走马', '小半', '虚拟', '小城夏天', '麦浪'];
+                    const erge = ['虫儿飞', '小了白了兔', '小幸运', '小模样', '小尾巴', '宝贝', '老公公老婆婆', '小城夏天', '小年兽', '快乐', '晴天和猫', '恶龙与小熊', '已经有我啦', '请你吃个冰激凌', '云朵变成棉花糖', '酸酸甜甜就是我', '你的眼睛像星星', '爱的魔法', '咖喱咖喱', '踏浪'];
+                    for (const kw of gufeng) { if (song.includes(kw)) return '国风'; }
+                    for (const kw of minyao) { if (song.includes(kw)) return '民谣'; }
+                    for (const kw of erge) { if (song.includes(kw)) return '儿歌'; }
+                    return '流行';
+                }
+
+                function getArtist(songName) {
+                    const found = DEFAULT_SONGS.find(s => s.name === songName);
+                    return found ? found.artist : '未知歌手';
+                }
+
+                window.PlaylistAPI = {
+                    get: function() {
+                        const stored = localStorage.getItem(STORAGE_KEY);
+                        if (stored) {
+                            try {
+                                const data = JSON.parse(stored);
+                                if (Array.isArray(data) && data.length > 0) {
+                                    // 数据迁移：检查是否有 artist 字段
+                                    if (data[0] && typeof data[0] === 'object' && !data[0].hasOwnProperty('artist')) {
+                                        console.log('🔄 迁移旧数据（添加歌手）...');
+                                        const migrated = data.map(item => ({
+                                            name: item.name,
+                                            artist: getArtist(item.name),
+                                            genre: item.genre || getGenre(item.name)
+                                        }));
+                                        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+                                        return migrated;
+                                    }
+                                    return data;
+                                }
+                            } catch (e) {}
+                        }
+                        const playlist = DEFAULT_SONGS.map(s => ({ name: s.name, artist: s.artist, genre: s.genre }));
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+                        return playlist;
+                    },
+                    save: function(playlist) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+                    },
+                    reset: function() {
+                        const playlist = DEFAULT_SONGS.map(s => ({ name: s.name, artist: s.artist, genre: s.genre }));
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+                        return playlist;
+                    },
+                    add: function(name, artist, genre) {
+                        if (!name || !name.trim()) throw new Error('歌名不能为空');
+                        const playlist = this.get();
+                        playlist.push({ 
+                            name: name.trim(), 
+                            artist: (artist && artist.trim()) ? artist.trim() : '未知歌手',
+                            genre: (genre && genre.trim()) ? genre.trim() : '流行' 
+                        });
+                        this.save(playlist);
+                        return playlist;
+                    },
+                    deleteByIndex: function(index) {
+                        const playlist = this.get();
+                        if (index < 0 || index >= playlist.length) throw new Error('索引越界');
+                        const deleted = playlist.splice(index, 1);
+                        this.save(playlist);
+                        return deleted[0];
+                    },
+                    update: function(index, newName, newArtist, newGenre) {
+                        const playlist = this.get();
+                        if (index < 0 || index >= playlist.length) throw new Error('索引越界');
+                        if (newName && newName.trim()) playlist[index].name = newName.trim();
+                        if (newArtist !== undefined && newArtist !== null) {
+                            playlist[index].artist = newArtist.trim() || '未知歌手';
+                        }
+                        if (newGenre && newGenre.trim()) playlist[index].genre = newGenre.trim();
+                        this.save(playlist);
+                        return playlist[index];
+                    },
+                    count: function() {
+                        return this.get().length;
+                    },
+                    getArtist: function(name) {
+                        const playlist = this.get();
+                        const found = playlist.find(item => item.name === name);
+                        return found ? found.artist : '未知歌手';
+                    }
+                };
+            }
+        }
+
+        // ============================================================
+        // 渲染函数（支持歌手显示）
+        // ============================================================
+
+        function render() {
+            if (!isLoggedIn) return;
+
+            try {
+                ensurePlaylistAPI();
+                const playlist = PlaylistAPI.get();
+
+                if (!playlist || playlist.length === 0) {
+                    editList.innerHTML = `
+                        <li class="empty-tip">
+                            <span class="emoji">🎵</span>
+                            歌单为空，添加一首歌吧！
+                        </li>
+                    `;
+                    if (songCountEl) songCountEl.textContent = '0';
+                    return;
+                }
+
+                let html = '';
+                for (let i = 0; i < playlist.length; i++) {
+                    const song = playlist[i];
+                    const isEditing = (editingIndex === i);
+                    const genreColor = getGenreColor(song.genre);
+                    const artist = song.artist || '未知歌手';
+
+                    html += `
+                        <li data-index="${i}" class="${isEditing ? 'editing' : ''}">
+                            <div class="song-info">
+                                <span class="song-index">#${i + 1}</span>
+                                <span class="song-name">${escapeHtml(song.name)}</span>
+                                <span class="song-artist">${escapeHtml(artist)}</span>
+                                <span class="song-genre-tag" style="color:${genreColor};background:${genreColor}15;border:1px solid ${genreColor}30;">
+                                    ${escapeHtml(song.genre)}
+                                </span>
+                            </div>
+                            <div class="song-actions">
+                                <button class="edit-btn" onclick="window.startEdit(${i})">✏️ 修改</button>
+                                <button class="delete-btn" onclick="window.deleteSong(${i})">🗑️ 删除</button>
+                            </div>
+                            <div class="inline-edit">
+                                <input type="text" class="edit-name" value="${escapeHtml(song.name)}" placeholder="歌名">
+                                <input type="text" class="edit-artist" value="${escapeHtml(artist)}" placeholder="歌手">
+                                <input type="text" class="edit-genre" value="${escapeHtml(song.genre)}" placeholder="类型">
+                                <button class="save-btn" onclick="window.saveEdit(${i})">保存</button>
+                                <button class="cancel-btn" onclick="window.cancelEdit()">取消</button>
+                            </div>
+                        </li>
+                    `;
+                }
+
+                editList.innerHTML = html;
+                if (songCountEl) songCountEl.textContent = playlist.length;
+
+            } catch (error) {
+                console.error('渲染失败:', error);
+                editList.innerHTML = `<li class="empty-tip">⚠️ 加载失败，请刷新页面</li>`;
+            }
+        }
+
+        // ============================================================
+        // 工具函数
+        // ============================================================
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getGenreColor(genre) {
+            const colorMap = {
+                '流行': '#4a6cf7',
+                '国风': '#e67e22',
+                '甜歌': '#e84393',
+                '民谣': '#27ae60',
+                '儿歌': '#e74c5e',
+                '未分类': '#95a5a6'
+            };
+            return colorMap[genre] || '#95a5a6';
+        }
+
+        function showToast(message, isSuccess = true) {
+            const existing = document.querySelector('.edit-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'edit-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: ${isSuccess ? 'rgba(39, 174, 96, 0.95)' : 'rgba(231, 76, 94, 0.95)'};
+                backdrop-filter: blur(12px);
+                color: white;
+                padding: 16px 32px;
+                border-radius: 16px;
+                font-size: 1.1rem;
+                font-weight: 500;
+                z-index: 999999;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+                animation: toastIn 0.3s ease;
+                pointer-events: none;
+                user-select: none;
+                max-width: 90%;
+                text-align: center;
+            `;
+
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300);
+            }, 1500);
+        }
+
+        // ============================================================
+        // 核心操作函数（支持歌手）
+        // ============================================================
+
+        window.addSong = function() {
+            if (!isLoggedIn) return;
+            ensurePlaylistAPI();
+
+            const name = songNameInput.value.trim();
+            const artist = songArtistInput.value.trim();
+            const genre = songGenreInput.value.trim() || '流行';
+
+            if (!name) {
+                showToast('❌ 请输入歌名', false);
+                songNameInput.focus();
+                return;
+            }
+
+            try {
+                PlaylistAPI.add(name, artist || undefined, genre);
+                songNameInput.value = '';
+                songArtistInput.value = '';
+                songGenreInput.value = '';
+                render();
+                showToast(`✅ 已添加: "${name}"${artist ? ' - ' + artist : ''}`);
+            } catch (error) {
+                showToast('❌ ' + error.message, false);
+            }
+        };
+
+        window.deleteSong = function(index) {
+            if (!isLoggedIn) return;
+            ensurePlaylistAPI();
+
+            const playlist = PlaylistAPI.get();
+            if (index < 0 || index >= playlist.length) return;
+            const songName = playlist[index].name;
+
+            if (!confirm(`确定要删除 "${songName}" 吗？`)) return;
+
+            try {
+                PlaylistAPI.deleteByIndex(index);
+                if (editingIndex === index) {
+                    editingIndex = -1;
+                } else if (editingIndex > index) {
+                    editingIndex--;
+                }
+                render();
+                showToast(`🗑️ 已删除: "${songName}"`);
+            } catch (error) {
+                showToast('❌ ' + error.message, false);
+            }
+        };
+
+        window.startEdit = function(index) {
+            if (!isLoggedIn) return;
+            if (editingIndex !== -1 && editingIndex !== index) {
+                window.cancelEdit();
+            }
+            editingIndex = index;
+            render();
+            setTimeout(() => {
+                const li = document.querySelector(`li[data-index="${index}"]`);
+                if (li) {
+                    const input = li.querySelector('.edit-name');
+                    if (input) input.focus();
+                }
+            }, 50);
+        };
+
+        window.saveEdit = function(index) {
+            if (!isLoggedIn) return;
+            ensurePlaylistAPI();
+
+            const li = document.querySelector(`li[data-index="${index}"]`);
+            if (!li) return;
+
+            const nameInput = li.querySelector('.edit-name');
+            const artistInput = li.querySelector('.edit-artist');
+            const genreInput = li.querySelector('.edit-genre');
+            const newName = nameInput.value.trim();
+            const newArtist = artistInput.value.trim();
+            const newGenre = genreInput.value.trim() || '流行';
+
+            if (!newName) {
+                showToast('❌ 歌名不能为空', false);
+                nameInput.focus();
+                return;
+            }
+
+            try {
+                PlaylistAPI.update(index, newName, newArtist, newGenre);
+                editingIndex = -1;
+                render();
+                showToast(`✅ 已更新: "${newName}"${newArtist ? ' - ' + newArtist : ''}`);
+            } catch (error) {
+                showToast('❌ ' + error.message, false);
+            }
+        };
+
+        window.cancelEdit = function() {
+            editingIndex = -1;
+            render();
+        };
+
+        window.clearAllSongs = function() {
+            if (!isLoggedIn) return;
+            ensurePlaylistAPI();
+
+            const count = PlaylistAPI.count();
+            if (count === 0) {
+                showToast('📭 歌单已经为空', false);
+                return;
+            }
+
+            if (!confirm(`确定要清空全部 ${count} 首歌吗？此操作不可撤销！`)) return;
+
+            try {
+                const playlist = PlaylistAPI.get();
+                for (let i = playlist.length - 1; i >= 0; i--) {
+                    PlaylistAPI.deleteByIndex(i);
+                }
+                editingIndex = -1;
+                render();
+                showToast(`🗑️ 已清空全部 ${count} 首歌`);
+            } catch (error) {
+                showToast('❌ ' + error.message, false);
+            }
+        };
+
+        window.resetPlaylist = function() {
+            if (!isLoggedIn) return;
+            if (!confirm('确定要恢复默认歌单吗？当前数据将被覆盖！')) return;
+
+            try {
+                ensurePlaylistAPI();
+                PlaylistAPI.reset();
+                editingIndex = -1;
+                render();
+                showToast(`🔄 已恢复默认歌单，共 ${PlaylistAPI.count()} 首歌`);
+            } catch (error) {
+                showToast('❌ ' + error.message, false);
+            }
+        };
+
+        window.goBack = function() {
+            if (editingIndex !== -1) {
+                window.cancelEdit();
+            }
+            history.back();
+        };
+
+        // ============================================================
+        // 键盘快捷键
+        // ============================================================
+
+        document.addEventListener('keydown', function(e) {
+            if (!isLoggedIn) return;
+
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const active = document.activeElement;
+                if (active === songNameInput || active === songArtistInput || active === songGenreInput) {
+                    e.preventDefault();
+                    window.addSong();
+                }
+            }
+
+            if (e.key === 'Escape' && editingIndex !== -1) {
+                window.cancelEdit();
+            }
+        });
+
+        // ============================================================
+        // 页面初始化
+        // ============================================================
+
+        checkLoginStatus();
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'playlist' && isLoggedIn) {
+                console.log('📦 检测到其他页面修改了歌单，自动刷新');
+                if (editingIndex !== -1) {
+                    editingIndex = -1;
+                }
+                render();
+            }
+        });
+
+        window.addEventListener('pageshow', function() {
+            if (isLoggedIn) {
+                if (editingIndex !== -1) {
+                    editingIndex = -1;
+                }
+                render();
+            }
+        });
+
+        console.log('📝 编辑页初始化完成（含歌手支持）');
+        console.log('💡 默认账号: yuchu / 1234567890');
+        console.log('💡 快捷键: Ctrl+Enter 添加 | ESC 取消编辑');
+    </script>
+
+</body>
+</html>
