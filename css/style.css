@@ -1093,3 +1093,122 @@ body {
     background: #b8bace;
     border-radius: 10px;
 }
+/* ===== 歌曲列表样式 - 支持歌手显示 ===== */
+#songList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: default;
+    gap: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.song-item:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateX(4px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.song-index {
+    color: #b0b0c0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.song-name {
+    flex: 1;
+    cursor: pointer;
+    font-weight: 500;
+    color: #1e1f2b;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    min-width: 60px;
+}
+
+.song-name:hover {
+    color: #4a6cf7;
+}
+
+/* ===== 歌手样式 ===== */
+.song-artist {
+    color: #7a7e9a;
+    font-size: 0.85rem;
+    min-width: 80px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ===== 曲风标签样式 ===== */
+.song-genre {
+    font-size: 0.7rem;
+    padding: 2px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.no-result {
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 1.1rem;
+}
+
+/* ===== 滚动条美化 ===== */
+.song-list-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.song-list-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb {
+    background: rgba(74, 108, 247, 0.3);
+    border-radius: 4px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 108, 247, 0.5);
+}
+
+/* ===== 响应式：小屏幕隐藏歌手 ===== */
+@media (max-width: 600px) {
+    .song-artist {
+        display: none;
+    }
+    .song-item {
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .song-name {
+        font-size: 0.9rem;
+    }
+    .song-index {
+        min-width: 24px;
+        font-size: 0.7rem;
+    }
+    .song-genre {
+        font-size: 0.6rem;
+        padding: 1px 8px;
+    }
+}
